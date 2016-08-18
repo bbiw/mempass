@@ -7,6 +7,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'Click',
+        'SQLAlchemy',
         #'PyQt5',
     ],
     entry_points='''

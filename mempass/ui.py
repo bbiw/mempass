@@ -8,6 +8,16 @@ This implementation uses PyQt5
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 
+class NewPassDlg:
+    @classmethod
+    def doModal(cls, name):
+        return dict(
+            name=name,
+            realm="nowhere",
+            username="fulano",
+            password="correct horse battery staple monkey lipstick",
+        )
+
 
 class CheckPassDlg(QtWidgets.QDialog):
 
