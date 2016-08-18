@@ -11,6 +11,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        mempass=mempass.main:cli
+        mempass=mempass.cli:main
     ''',
 )
