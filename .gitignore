@@ -1,0 +1,4 @@
+*.egg-info/
+mempass.db
+__pycache__/
+*.py[co]
