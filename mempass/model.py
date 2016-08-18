@@ -23,6 +23,13 @@ from sqlalchemy.orm import exc as orm
 
 Base = declarative_base()
 
+class Session(Base):
+    __tablename__ = 'sessions'
+
+    id = Column(Integer, primary_key=True)
+    when = Column(DateTime)
+
+
 class Secret(Base):
     __tablename__ = 'secrets'
 
@@ -48,8 +55,10 @@ class Attempt(Base):
     # milliseconds between first and final keystrokes
     elapsed = Column(Integer)
     secret_id = Column(Integer, ForeignKey('secrets.id'))
+    session_id = Column(Integer, ForeignKey('sessions.id'))
 
     secret = relationship("Secret", back_populates="history")
+    session = relationship("Session", back_populates="activity")
 
     def __repr__(self):
         return "<Attempt(when='{}', errors={}, work={}, elapsed={})>".format(
@@ -58,6 +67,8 @@ class Attempt(Base):
 Secret.history = relationship(
         "Attempt", order_by=Attempt.when, back_populates="secret")
 
+Session.activity = relationship(
+        "Attempt", order_by=Attempt.when, back_populates="session")
 
 
 
@@ -98,6 +109,9 @@ class PassDB:
         Base.metadata.create_all(engine)
         self.Session = sqlalchemy.orm.session.sessionmaker(bind=self.engine)
         self.session = self.Session()
+        pws = self.pw_session = Session(when=datetime.utcnow())
+        self.session.add(pws)
+        self.session.commit()
 
     def create(self):
         Secret.metadata.create_all(self.engine)
@@ -122,6 +136,7 @@ class PassCheck:
 
     def __init__(self, db, secret, dot="·"):
         self.db = db
+        self.session_id = db.pw_session.id
         self.__secret = secret
         self.key = secret.name
         self.realm = secret.realm
@@ -179,7 +194,9 @@ class PassCheck:
             masked=self.__hc,
             errors=calculate_error_distance(text,self.__pw),
             work=self.work,
-            elapsed=round((end-self.start)*1000)))
+            elapsed=round((end-self.start)*1000),
+            session_id=self.session_id,
+            ))
         self.db.save()
         if ok:
             self.__hc = min(len(self.__pw), self.__hc + self.__hi)
