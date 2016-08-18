@@ -42,6 +42,7 @@ class Attempt(Base):
 
     id = Column(Integer, primary_key=True)
     when = Column(DateTime)
+    masked = Column(Integer)  # number of characters masked
     errors = Column(Integer)  # distance between entered and actual
     work = Column(Integer)    # (roughly) the number of keystrokes
     # milliseconds between first and final keystrokes
@@ -175,6 +176,7 @@ class PassCheck:
         end = tick()
         ok = self.__pw == text
         self.__secret.history.append(Attempt(when=datetime.utcnow(),
+            masked=self.__hc,
             errors=calculate_error_distance(text,self.__pw),
             work=self.work,
             elapsed=round((end-self.start)*1000)))
