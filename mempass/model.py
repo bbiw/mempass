@@ -177,7 +177,7 @@ class PassCheck:
         self.__secret.history.append(Attempt(when=datetime.utcnow(),
             errors=calculate_error_distance(text,self.__pw),
             work=self.work,
-            elapsed=end-self.start))
+            elapsed=round((end-self.start)*1000)))
         self.db.save()
         if ok:
             self.__hc = min(len(self.__pw), self.__hc + self.__hi)
