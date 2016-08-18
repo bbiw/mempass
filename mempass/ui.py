@@ -99,4 +99,4 @@ def mainloop(db, whichpass):
     pcheck = pdb.getChecker(whichpass)
     app = QtWidgets.QApplication([])
     ex = CheckPassDlg.doModal(pcheck, 10)
-    pcheck.save()
+    pdb.save()
