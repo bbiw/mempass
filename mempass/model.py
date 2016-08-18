@@ -103,6 +103,6 @@ class PassCheck:
         """return a prompt based on how well proposed matches password."""
         return self._prefix(proposed, self.__pw, self.__prompt)
 
-    def save():
+    def save(self):
         """Write changes to persistent storage."""
         #!!!
