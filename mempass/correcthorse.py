@@ -1,6 +1,7 @@
 import os
 import math
 import pkg_resources
+import click
 
 
 def slurp(fname):
@@ -27,10 +28,10 @@ def genpass(big, *wordlists):
                 return
 
 
-def getwords(wordlist):
+def getwords(wordlists):
     """return a list of all unique words in all specified files"""
     words = []
-    for wl in wordlist:
+    for wl in wordlists:
         if os.path.exists(wl):
             words.extend(slurp(wl))
             continue
@@ -43,7 +44,13 @@ def getwords(wordlist):
     return list(set(words))
 
 
-def gp(words, bits, sep):
+def random_passphrase(words, bits=90, join=' '):
+    """return a tuple ( passphrase, bits )
+
+    `passphrase` is a seqence of `words` joined by `join`
+    `bits` is an estimate of the number of bits of entropy in the passphrase.
+        It should be >= the bits specified as a parameter.
+     """
     wc = len(words)
     bitsperword = math.log(wc, 2)
     cbytes = math.ceil(bits / 8)
@@ -54,24 +61,23 @@ def gp(words, bits, sep):
         big, small = divmod(big, wc)
         ww.append(words[small])
         bitsleft -= bitsperword
-    return sep.join(ww), bitsperword * len(ww)
-
-import click
+    return join.join(ww), bitsperword * len(ww)
 
 
 @click.command()
-@click.option('--wordlist', '-w', default=['default'], multiple=True)
-@click.option('--count', '-c', type=int, default=8)
-@click.option('--bits', '-b', type=int, default=90)
-@click.option('--join', '-j', default=' ')
-@click.option('--verbose/--quiet', '-v', default=False)
+@click.option('--wordlist', '-w', default=['default'], multiple=True, help='list of words to choose from (default=diceware)')
+@click.option('--count', '-c', type=int, default=8, help='number of passphrases (default=8)')
+@click.option('--bits', '-b', type=int, default=90, help='minimum bits of entropy per passphrase (default=90)')
+@click.option('--join', '-j', default=' ', help='join words with this character (default=space)')
+@click.option('--verbose/--quiet', '-v', default=False, help='print extra stuff to stderr (default=quiet)')
 def cli(wordlist, count, bits, join, verbose):
+    """print strong random passphrases (e.g.'correct horse battery staple')"""
     if verbose:
-        click.echo('wordlists: {} count: {} bits: {}'.format(
+        sys.stderr.write('wordlists: {} count: {} bits: {}\n'.format(
             wordlist, count, bits))
     words = getwords(wordlist)
     for i in range(count):
-        w, b = gp(words, bits, join)
+        w, b = random_passphrase(words, bits, join)
         if verbose:
-            print('{} bits'.format(b))
+            sys.stderr.write('{} bits\n'.format(b))
         print(w)
