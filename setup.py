@@ -13,5 +13,7 @@ setup(
     entry_points='''
         [console_scripts]
         mempass=mempass.cli:main
+        chbs=mempass.correcthorse:cli
+        simple=mempass.simple:cli
     ''',
 )
